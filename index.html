@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif IPA Kelas VII - PTS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 650px;
+            padding: 30px;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .game-title {
+            color: #2c3e50;
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #34495e;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: #00f2fe;
+        }
+
+        .btn-start, .btn-next, .btn-restart {
+            width: 100%;
+            background: #ff7675;
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.4);
+            transition: 0.2s;
+        }
+
+        .btn-start:hover, .btn-next:hover:not(:disabled), .btn-restart:hover {
+            background: #d63031;
+            transform: translateY(-2px);
+        }
+
+        .btn-next:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Progress Bar & Header */
+        .progress-bar-container {
+            width: 100%;
+            height: 10px;
+            background: #eee;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #00b894;
+            transition: width 0.3s;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            color: #636e72;
+            margin-bottom: 20px;
+        }
+
+        /* Question Area */
+        .question-card h2 {
+            font-size: 18px;
+            color: #2d3436;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .img-container {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .img-container img {
+            max-width: 100%;
+            max-height: 220px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .option-btn img {
+            max-height: 80px;
+            max-width: 100%;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .option-btn:hover {
+            background: #e3f2fd;
+            border-color: #90caf9;
+        }
+
+        .option-btn.selected {
+            background: #6c5ce7;
+            color: white;
+            border-color: #6c5ce7;
+        }
+
+        /* Result Screen */
+        .result-card {
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.4);
+        }
+
+        #final-score {
+            font-size: 42px;
+            font-weight: 700;
+        }
+
+        .saving-status {
+            margin: 15px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #0984e3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <!-- 1. HALAMAN UTAMA / IDENTITAS -->
+        <div id="start-screen" class="screen active">
+            <h1 class="game-title">🧪 Science Quiz Hero! 🔬</h1>
+            <p class="subtitle">Penilaian Tengah Semester (PTS) IPA Kelas VII (40 Soal)</p>
+            
+            <form id="identity-form">
+                <div class="input-group">
+                    <label for="student-name">Nama Lengkap Siswa:</label>
+                    <input type="text" id="student-name" placeholder="Masukkan nama lengkap..." required>
+                </div>
+                <div class="input-group">
+                    <label for="student-class">Kelas:</label>
+                    <select id="student-class" required>
+                        <option value="">-- Pilih Kelas --</option>
+                        <option value="VII A">VII A</option>
+                        <option value="VII B">VII B</option>
+                        <option value="VII C">VII C</option>
+                        <option value="VII D">VII D</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-start">Mulai Petualangan! 🚀</button>
+            </form>
+        </div>
+
+        <!-- 2. HALAMAN GAME KUIS -->
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-header">
+                <div class="progress-bar-container">
+                    <div id="progress-bar"></div>
+                </div>
+                <div class="header-info">
+                    <span id="question-number">Soal 1 / 40</span>
+                    <span id="score-live">Skor: 0</span>
+                </div>
+            </div>
+
+            <div class="question-card">
+                <h2 id="question-text">Teks Soal...</h2>
+                <div id="question-image-container" class="img-container">
+                    <!-- Tempat Gambar Soal Utama -->
+                </div>
+                <div id="options-container" class="options-grid">
+                    <!-- Pilihan Jawaban -->
+                </div>
+            </div>
+
+            <button id="btn-next" class="btn-next" disabled>Lanjut Soal ➔</button>
+        </div>
+
+        <!-- 3. HALAMAN SKOR & HASIL -->
+        <div id="result-screen" class="screen">
+            <div class="result-card">
+                <h2>🎉 Kuis Selesai! 🎉</h2>
+                <p class="player-info"><span id="res-name">Nama</span> (<span id="res-class">Kelas</span>)</p>
+                <div class="score-circle">
+                    <span id="final-score">0</span>
+                    <small>Nilai Akhir</small>
+                </div>
+                <p id="score-feedback">Hebat! Kamu telah menyelesaikan kuis ini.</p>
+
+                <div id="status-saving" class="saving-status">
+                     Mengirim nilai ke sistem Guru... ⏳
+                </div>
+
+                <button onclick="location.reload()" class="btn-restart">Coba Lagi 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // TAUTAN GOOGLE APPS SCRIPT
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyfExIvuhxR040lAmtQiKYEMhGjmG_I6pvtIliJyMP2iaTwpOHG1CD8q0VQWqb8fXyD/exec";
+
+        // DATA 40 SOAL PTS VII LENGKAP DARI DOKUMEN
+        const quizData = [
+            {
+                question: "Berikut ini gambar molekul unsur S8 yang benar yaitu . . . . . . . .",
+                image: "https://via.placeholder.com/150?text=Gambar+Molekul+S8",
+                options: [
+                    { text: "a", image: "https://uploads.onecompiler.io/453ac96k8/1789446458230/no%201%20pilihan%20a.png" },
+                    { text: "b", image: "https://uploads.onecompiler.io/453ac96k8/1789446464111/no%201%20pilihan%20b.png" },
+                    { text: "c", image: "https://uploads.onecompiler.io/453ac96k8/1789446468827/no%201%20pilihan%20c.png" },
+                    { text: "d", image: "https://uploads.onecompiler.io/453ac96k8/1789446473111/no%201%20pilihan%20d.png" }
+                ],
+                answer: 0
+            },
+            {
+                question: "Berikut ini perubahan dari padat menjadi cair adalah…",
+                image: null,
+                options: [{ text: "Mencair" }, { text: "Membeku" }, { text: "Mengembun" }, { text: "Menguap" }],
+                answer: 0
+            },
+            {
+                question: "Pernyataan yang tepat untuk unsur adalah……",
+                image: null,
+                options: [
+                    { text: "Zat tunggal yang sudah tidak dapat dibagi." },
+                    { text: "Zat tunggal yang tidak dapat bercampur dengan zat tunggal lain." },
+                    { text: "Zat tunggal yang tidak dapat bersenyawa dengan zat tunggal lain." },
+                    { text: "Zat tunggal yang tidak dapat diuraikan menjadi zat yang lebih sederhana." }
+                ],
+                answer: 3
+            },
+            {
+                question: "Campuran yang tidak dapat dibedakan antara pelarut dengan zat terlarutnya disebut....",
+                image: null,
+                options: [{ text: "Unsur" }, { text: "Campuran homogen" }, { text: "Senyawa" }, { text: "Koloid" }],
+                answer: 1
+            },
+            {
+                question: "Diketahui beberapa sifat unsur sebagai berikut:\n1. Konduktor\n2. Titik cair dan titik didih relatif tinggi\n3. Keras tetapi rapuh\n4. Massa jenis relatif besar\nYang merupakan sifat umum dari logam adalah…….",
+                image: null,
+                options: [{ text: "1, 2 dan 3" }, { text: "1, 2 dan 4" }, { text: "1 dan 3" }, { text: "2 dan 4" }],
+                answer: 1
+            },
+            {
+                question: "Salah satu sifat yang dimiliki unsur logam yaitu . . . .",
+                image: null,
+                options: [{ text: "tidak mengilap" }, { text: "rapuh" }, { text: "umumnya berwujud gas" }, { text: "penghantar listrik yang baik" }],
+                answer: 3
+            },
+            {
+                question: "Berikut ini yang termasuk ke dalam campuran homogen, kecuali ....",
+                image: null,
+                options: [{ text: "Teh manis" }, { text: "Sirup rasa jeruk" }, { text: "Sayur sup" }, { text: "Larutan gula" }],
+                answer: 2
+            },
+            {
+                question: "Lambang unsur untuk oksigen yaitu .........",
+                image: null,
+                options: [{ text: "Ok" }, { text: "O" }, { text: "Og" }, { text: "O3" }],
+                answer: 1
+            },
+            {
+                question: "Berikut penggolongan unsur berdasarkan sifat unsurnya, kecuali . . . ",
+                image: null,
+                options: [{ text: "non logam" }, { text: "logam" }, { text: "semilogam" }, { text: "campuran" }],
+                answer: 3
+            },
+            {
+                question: "Campuran air dengan gula merupakan salah satu contoh dari . . . .",
+                image: null,
+                options: [{ text: "Unsur" }, { text: "Senyawa" }, { text: "Campuran heterogen" }, { text: "Campuran homogen" }],
+                answer: 3
+            },
+            {
+                question: "Salah satu contoh dari unsur semilogam yaitu . . . .",
+                image: null,
+                options: [{ text: "besi" }, { text: "perak" }, { text: "silikon" }, { text: "oksigen" }],
+                answer: 2
+            },
+            {
+                question: "Berikut ini gambar senyawa NH3 yang benar yaitu ….. (symbol N = Hitam dan H = Putih)",
+                image: null,
+                options: [
+                    { text: "A", image: "https://uploads.onecompiler.io/453ac96k8/1789446478881/soal%2012%20pilihan%20a.jpg" },
+                    { text: "B", image: "https://uploads.onecompiler.io/453ac96k8/1789446485062/soal%2012%20pilihan%20b.jpg" },
+                    { text: "C", image: "https://uploads.onecompiler.io/453ac96k8/1789446497879/soal%2012%20pilihan%20c.jpg" },
+                    { text: "D", image: "https://uploads.onecompiler.io/453ac96k8/1789446508904/soal%2012%20pilihan%20d.jpg" }
+                ],
+                answer: 2
+            },
+            {
+                question: "Pada senyawa CaCO3 terdapat . . . . .",
+                image: null,
+                options: [{ text: "1 unsur Ca" }, { text: "1 unsur O" }, { text: "3 unsur C" }, { text: "6 unsur O" }],
+                answer: 0
+            },
+            {
+                question: "Pada senyawa H2SO4 terdapat ……",
+                image: null,
+                options: [
+                    { text: "2 atom hidrogen, 2 atom sulfur, 1 atom oksigen" },
+                    { text: "1 atom hidrogen, 1 atom sulfur, 1 atom oksigen" },
+                    { text: "2 atom hidrogen, 1 atom sulfur, 4 atom oksigen" },
+                    { text: "2 atom hidrogen, 2 atom sulfur, 4 atom oksigen" }
+                ],
+                answer: 2
+            },
+            {
+                question: "Jika suatu senyawa terdiri dari 2 buah atom H dan 1 buah atom O. Rumus senyawa tersebut yaitu …",
+                image: null,
+                options: [{ text: "H3O" }, { text: "OH" }, { text: "2HO" }, { text: "H2O" }],
+                answer: 3
+            },
+            {
+                question: "Perhatikan gambar di bawah ini. Nilai yang terukur pada alat tersebut adalah ....",
+                image: "https://uploads.onecompiler.io/453ac96k8/1789446517523/soal%2016.png",
+                options: [{ text: "6,33 mm" }, { text: "6,30 mm" }, { text: "6,73 mm" }, { text: "6,13 mm" }],
+                answer: 2
+            },
+            {
+                question: "Hasil pengukuran dari jangka sorong berikut adalah … cm.",
+                image: "https://uploads.onecompiler.io/453ac96k8/1789446524426/soal%2017.png",
+                options: [{ text: "5,4" }, { text: "5,1" }, { text: "4,35" }, { text: "4,33" }],
+                answer: 3
+            },
+            {
+                question: "Sebuah pensil diukur dengan menggunakan mistar seperti pada gambar berikut. Panjang pensil adalah ... cm.",
+                image: "https://uploads.onecompiler.io/453ac96k8/1789445984936/18.png",
+                options: [{ text: "A. 9,7" }, { text: "B. 11,7" }, { text: "C. 13,7" }, { text: "D. 15,7" }],
+                answer: 1
+            },
+            {
+                question: "Dari hasil pengukuran diameter sebuah bola dengan menggunakan jangka sorong, diketahui panjang diameter bola 6,26 cm. Gambar di bawah ini yang menunjukkan hasil pengukuran tersebut adalah….",
+                image: "https://via.placeholder.com/350x250?text=Gambar+Pilihan+Jangka+Sorong+Bola",
+                options: [{ text: "a", image: "https://uploads.onecompiler.io/453ac96k8/1789446337721/19%20pil%20a.png" },
+                    { text: "b", image: "https://uploads.onecompiler.io/453ac96k8/1789446344275/19%20pil%20b.png" },
+                    { text: "c", image: "https://uploads.onecompiler.io/453ac96k8/1789446354954/19%20pil%20c.png" },
+                    { text: "d", image: "https://uploads.onecompiler.io/453ac96k8/1789446362662/19%20pil%20d.png" }],
+                answer: 2
+            },
+            {
+                question: "Sebuah benda berbentuk bola kecil diukur diameternya menggunakan mikrometer sekrup seperti terlihat pada gambar di bawah ini! Hasil pengukuran di atas yang benar adalah….",
+                image: "https://uploads.onecompiler.io/453ac96k8/1789446419022/20.png",
+                options: [{ text: "6,31 mm" }, { text: "7,31 mm" }, { text: "8,31 mm" }, { text: "8,41 mm" }],
+                answer: 1
+            },
+            {
+                question: "Proses perubahan wujud zat dari cair menjadi gas disebut ....",
+                image: null,
+                options: [{ text: "Membeku" }, { text: "Menguap" }, { text: "Melebur" }, { text: "Mengembun" }],
+                answer: 1
+            },
+            {
+                question: "Jumlah atom dalam 2 molekul H2O yaitu . . .",
+                image: null,
+                options: [{ text: "3" }, { text: "4" }, { text: "5" }, { text: "6" }],
+                answer: 3
+            },
+            {
+                question: "Dari bahan di bawah ini yang tergolong heterogen adalah ...........",
+                image: null,
+                options: [
+                    { text: "Campuran pasir-air dan air kopi" },
+                    { text: "Sirup dan air kopi" },
+                    { text: "Air sabun dan santan" },
+                    { text: "Air gula dan alkohol 70%" }
+                ],
+                answer: 0
+            },
+            {
+                question: "Perhatikan gambar mikrometer sekrup berikut ini! Besar pengukurannya adalah …. mm",
+                image: "https://uploads.onecompiler.io/453ac96k8/1789446431794/24.jpg",
+                options: [{ text: "A. 2,93" }, { text: "B. 3,27" }, { text: "C. 3,48" }, { text: "D. 3,77" }],
+                answer: 3
+            },
+            {
+                question: "Perhatikan gambar di bawah ini! Hasil pengukuran tebal sebuah buku fisika menggunakan jangka sorong seperti diperlihatkan pada gambar di atas adalah …. cm",
+                image: "https://uploads.onecompiler.io/453ac96k8/1789446436839/25.jpg",
+                options: [{ text: "A. 2,76 cm" }, { text: "B. 2,95 cm" }, { text: "C. 3,25 cm" }, { text: "D. 3,16 cm" }],
+                answer: 0
+            },
+            {
+                question: "Seorang siswa mengukur diameter sebuah pipa menggunakan jangka sorong seperti terlihat pada gambar berikut. Hasil pengukuran diameter pipa tersebut adalah …. cm",
+                image: "https://uploads.onecompiler.io/453ac96k8/1789446442066/26.jpg",
+                options: [{ text: "A. 4,17 cm" }, { text: "B. 4,29 cm" }, { text: "C. 4,57 cm" }, { text: "D. 5,03 cm" }],
+                answer: 0
+            },
+            {
+                question: "Perhatikan gambar mikrometer sekrup berikut ini. Besar pengukurannya adalah …. mm",
+                image: "https://uploads.onecompiler.io/453ac96k8/1789446448017/27.jpg",
+                options: [{ text: "A. 3,22 mm" }, { text: "B. 3,53 mm" }, { text: "C. 3,86 mm" }, { text: "D. 4,17 mm" }],
+                answer: 0
+            },
+            {
+                question: "Perubahan uap air di udara menjadi tetesan embun disebut dengan………",
+                image: null,
+                options: [{ text: "Pencairan" }, { text: "Penyubliman" }, { text: "Pelelehan" }, { text: "Pengembunan" }],
+                answer: 3
+            },
+            {
+                question: "Perubahan wujud dari padat menjadi cair adalah ….",
+                image: null,
+                options: [{ text: "Membeku" }, { text: "Menguap" }, { text: "Mencair" }, { text: "Menyublim" }],
+                answer: 2
+            },
+            {
+                question: "Jika suatu senyawa terdiri dari 2 buah atom H dan 1 buah atom O. Rumus senyawa tersebut yaitu …",
+                image: null,
+                options: [{ text: "H3O" }, { text: "OH" }, { text: "2HO" }, { text: "H2O" }],
+                answer: 3
+            },
+            {
+                question: "Jarak antar partikel untuk zat gas adalah….",
+                image: null,
+                options: [{ text: "Sangat rapat" }, { text: "Renggang" }, { text: "Sangat renggang" }, { text: "Tidak bergerak" }],
+                answer: 2
+            },
+            {
+                question: "Kuningan merupakan salah satu contoh dari .......",
+                image: null,
+                options: [{ text: "unsur" }, { text: "campuran" }, { text: "senyawa" }, { text: "atom" }],
+                answer: 1
+            },
+            {
+                question: "Jumlah oksigen dalam 3 molekul CH3COOH adalah…..",
+                image: null,
+                options: [{ text: "1" }, { text: "2" }, { text: "6" }, { text: "9" }],
+                answer: 2
+            },
+            {
+                question: "Rumus senyawa yang terdiri dari 6 buah atom karbon, 12 buah atom hidrogen dan 6 buah oksigen adalah ………",
+                image: null,
+                options: [{ text: "CHO" }, { text: "CH12O6" }, { text: "Ca6H12O6" }, { text: "C6H12O6" }],
+                answer: 3
+            },
+            {
+                question: "Aturan penulisan lambang unsur yang tidak benar yaitu ......",
+                image: null,
+                options: [
+                    { text: "Unsur yang dilambangkan dengan satu huruf ditulis dengan huruf kapital" },
+                    { text: "Unsur yang dilambangkan dengan dua huruf atau lebih ditulis dengan huruf kapital" },
+                    { text: "Unsur yang dilambangkan dengan dua huruf atau lebih, huruf pertama ditulis dengan huruf kapital dan diikuti huruf kecil" },
+                    { text: "Penulisan lambang unsur yang benar untuk unsur Oksigen yaitu O" }
+                ],
+                answer: 1
+            },
+            {
+                question: "Jumlah atom dalam 1 molekul CO(NH2)2 adalah ….",
+                image: null,
+                options: [{ text: "6" }, { text: "7" }, { text: "8" }, { text: "9" }],
+                answer: 2
+            },
+            {
+                question: "Berikut ini yang merupakan senyawa adalah …. ",
+                image: null,
+                options: [{ text: "Co" }, { text: "C" }, { text: "CO" }, { text: "O2" }],
+                answer: 2
+            },
+            {
+                question: "Satuan dari besaran panjang adalah ….",
+                image: null,
+                options: [{ text: "Kilogram" }, { text: "Sekon" }, { text: "Meter" }, { text: "Mol" }],
+                answer: 2
+            },
+            {
+                question: "Sulis berlari sejauh 300 meter. Pada angka 300 merupakan …",
+                image: null,
+                options: [{ text: "Satuan besaran" }, { text: "Nilai Besaran" }, { text: "Satuan Panjang" }, { text: "Besaran volume" }],
+                answer: 1
+            },
+            {
+                question: "Alat yang digunakan untuk mengukur panjang meja adalah ....",
+                image: null,
+                options: [{ text: "timbangan" }, { text: "penggaris" }, { text: "termometer" }, { text: "anemometer" }],
+                answer: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let studentName = "";
+        let studentClass = "";
+        let selectedOptionIndex = null;
+
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const identityForm = document.getElementById('identity-form');
+        const questionText = document.getElementById('question-text');
+        const questionImgContainer = document.getElementById('question-image-container');
+        const optionsContainer = document.getElementById('options-container');
+        const btnNext = document.getElementById('btn-next');
+        const progressBar = document.getElementById('progress-bar');
+        const questionNumber = document.getElementById('question-number');
+        const scoreLive = document.getElementById('score-live');
+
+        // Submit Form Identitas
+        identityForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            studentName = document.getElementById('student-name').value;
+            studentClass = document.getElementById('student-class').value;
+
+            startScreen.classList.remove('active');
+            quizScreen.classList.add('active');
+            loadQuestion();
+        });
+
+        // Muat Soal
+        function loadQuestion() {
+            selectedOptionIndex = null;
+            btnNext.disabled = true;
+
+            const data = quizData[currentQuestion];
+            questionText.innerText = `${currentQuestion + 1}. ${data.question}`;
+            
+            // Progress Bar & Info
+            progressBar.style.width = `${((currentQuestion + 1) / quizData.length) * 100}%`;
+            questionNumber.innerText = `Soal ${currentQuestion + 1} / ${quizData.length}`;
+            scoreLive.innerText = `Skor: ${score}`;
+
+            // Render Gambar Soal Utama (Jika URL tidak null)
+            questionImgContainer.innerHTML = "";
+            if (data.image) {
+                const img = document.createElement('img');
+                img.src = data.image;
+                img.alt = "Gambar Soal";
+                questionImgContainer.appendChild(img);
+            }
+
+            // Render Pilihan Jawaban
+            optionsContainer.innerHTML = "";
+            data.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.type = 'button';
+                
+                let content = `<span><strong>${String.fromCharCode(65 + idx)}.</strong> ${opt.text || ''}</span>`;
+                if (opt.image) {
+                    content += `<img src="${opt.image}" alt="Pilihan ${String.fromCharCode(65 + idx)}">`;
+                }
+                btn.innerHTML = content;
+
+                btn.onclick = () => selectOption(idx, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectOption(index, btnElement) {
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btnElement.classList.add('selected');
+            selectedOptionIndex = index;
+            btnNext.disabled = false;
+        }
+
+        btnNext.addEventListener('click', () => {
+            // Menghitung bobot skor per soal (100 / 40 = 2.5 poin per soal)
+            if (quizData[currentQuestion].answer === selectedOptionIndex) {
+                score += (100 / quizData.length);
+            }
+
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        // Halaman Akhir & Pengiriman ke Google Sheets
+        function showResults() {
+            quizScreen.classList.remove('active');
+            resultScreen.classList.add('active');
+
+            const finalScoreFormatted = Math.round(score);
+
+            document.getElementById('res-name').innerText = studentName;
+            document.getElementById('res-class').innerText = studentClass;
+            document.getElementById('final-score').innerText = finalScoreFormatted;
+
+            sendDataToGoogleSheet(studentName, studentClass, finalScoreFormatted);
+        }
+
+        function sendDataToGoogleSheet(name, className, scoreValue) {
+            const statusDiv = document.getElementById('status-saving');
+            
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    nama: name,
+                    kelas: className,
+                    skor: scoreValue,
+                    waktu: new Date().toLocaleString("id-ID")
+                })
+            }).then(() => {
+                statusDiv.innerHTML = "✅ Data nilai berhasil tersimpan ke sistem!";
+                statusDiv.style.color = "#00b894";
+            }).catch(error => {
+                statusDiv.innerHTML = "❌ Gagal menyimpan nilai otomatis.";
+                statusDiv.style.color = "#d63031";
+                console.error("Error:", error);
+            });
+        }
+    </script>
+</body>
+</html>
